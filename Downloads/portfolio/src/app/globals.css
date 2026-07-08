@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gesso: #f7f6f3;
+  --color-ink: #101012;
+  --color-mist: #6b6b70;
+  --color-line: #e4e2dc;
+  --color-ultra: #3b30e8;
+  --color-coal: #0c0c0e;
+
+  --font-display: "Schibsted Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "Spline Sans Mono", monospace;
+}
+
+/* Lenis takes over scrolling */
+html {
+  scrollbar-width: none;
+  overscroll-behavior-y: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  background: var(--color-gesso);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--case-accent, var(--color-ultra));
+  color: #fff;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-mist);
+}
+
+.hairline {
+  border-color: var(--color-line);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--case-accent, var(--color-ultra));
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Nav link slide effect (inspired by R—K) */
+.nav-link {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  flex-direction: column;
+  height: 1.25em;
+  transition: color 0.3s ease;
+}
+.nav-link:hover {
+  color: var(--color-ink);
+}
+.nav-link__text,
+.nav-link__clone {
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.77, 0, 0.18, 1);
+  line-height: 1.25em;
+}
+.nav-link__clone {
+  position: absolute;
+  top: 100%;
+  left: 0;
+}
+.nav-link:hover .nav-link__text {
+  transform: translateY(-100%);
+}
+.nav-link:hover .nav-link__clone {
+  transform: translateY(-100%);
+}
+
+/* Marquee strip */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee 18s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .marquee-track { animation: none; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
