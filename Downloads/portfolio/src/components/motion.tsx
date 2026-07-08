@@ -259,6 +259,97 @@ export function Preloader() {
   );
 }
 
+// ── CasesRow (horizontal grid inspirado em R—K) ──────────────────────────────
+interface CaseItem {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string;
+  accent: string;
+  coverUrl: string | null;
+  flexWeight: number;
+}
+
+export function CasesRow({
+  items,
+  basePath,
+}: {
+  items: CaseItem[];
+  basePath: string;
+}) {
+  const reduce = useReducedMotion();
+  const rowRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: rowRef,
+    offset: ["start end", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [-55, 55]);
+
+  return (
+    <motion.div
+      ref={rowRef}
+      className="flex flex-col gap-2 md:flex-row md:gap-[3px]"
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 1, ease }}
+    >
+      {items.map((item, i) => (
+        <a
+          key={item.id}
+          href={`${basePath}/case/${item.slug}`}
+          className="group flex flex-col"
+          style={{ flex: item.flexWeight }}
+        >
+          {/* Imagem com parallax */}
+          <div className="h-[55vh] md:h-[65vh] overflow-hidden relative bg-[color:var(--color-line)]">
+            {item.coverUrl ? (
+              <motion.div
+                style={{
+                  y,
+                  position: "absolute",
+                  top: -60,
+                  bottom: -60,
+                  left: 0,
+                  right: 0,
+                }}
+              >
+                <Image
+                  src={item.coverUrl}
+                  alt={item.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 60vw"
+                  className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+                  priority={i === 0}
+                />
+              </motion.div>
+            ) : (
+              <div
+                className="absolute inset-0 transition-transform duration-700 group-hover:scale-[1.04]"
+                style={{
+                  background: `linear-gradient(135deg, ${item.accent} 0%, #0c0c0e 150%)`,
+                }}
+              />
+            )}
+            {/* Hover overlay sutil */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500 ease-out" />
+          </div>
+
+          {/* Texto abaixo do card */}
+          <div className="pt-4 pb-2">
+            <p className="text-[0.85rem] font-medium leading-snug text-[color:var(--color-ink)]">
+              {item.title}
+            </p>
+            <p className="text-[0.85rem] leading-snug text-[color:var(--color-mist)]">
+              {item.subtitle}
+            </p>
+          </div>
+        </a>
+      ))}
+    </motion.div>
+  );
+}
+
 // ── ScrollAwareHeader ─────────────────────────────────────────────────────────
 export function ScrollAwareHeader({ children }: { children: ReactNode }) {
   const [hidden, setHidden] = useState(false);

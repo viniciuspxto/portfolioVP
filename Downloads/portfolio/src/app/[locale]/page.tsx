@@ -1,6 +1,6 @@
 import { supabase, Case, pick } from "@/lib/supabase";
 import { dict, categories, Locale } from "@/lib/dict";
-import { Reveal, SplitHeading, ParallaxCard } from "@/components/motion";
+import { Reveal, SplitHeading, CasesRow } from "@/components/motion";
 
 export const revalidate = 60;
 
@@ -15,6 +15,9 @@ const MARQUEE_ITEMS = [
   "Estratégia",
 ];
 
+// Distribuição de larguras para até 6 cases por linha
+const FLEX_WEIGHTS = [7, 5, 6, 4, 5, 7];
+
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = dict[locale as Locale];
@@ -27,6 +30,18 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
   const cases = (data ?? []) as Case[];
   const marquee = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+
+  const caseItems = cases.map((c, i) => ({
+    id: c.id,
+    slug: c.slug,
+    title: pick(c, "title", locale),
+    subtitle:
+      pick(c, "role", locale) ||
+      (categories[c.category]?.[locale as Locale] ?? c.category),
+    accent: c.accent,
+    coverUrl: c.cover_url,
+    flexWeight: FLEX_WEIGHTS[i % FLEX_WEIGHTS.length],
+  }));
 
   return (
     <>
@@ -58,7 +73,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <div className="flex whitespace-nowrap">
           <div className="marquee-track flex gap-10 pr-10">
             {marquee.map((item, i) => (
-              <span key={i} className="font-mono text-xs tracking-[0.14em] uppercase text-[color:var(--color-mist)]">
+              <span
+                key={i}
+                className="font-mono text-xs tracking-[0.14em] uppercase text-[color:var(--color-mist)]"
+              >
                 {item}
                 <span className="ml-10 text-[color:var(--color-line)]">·</span>
               </span>
@@ -68,36 +86,28 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       </div>
 
       {/* ── Cases ────────────────────────────────────────────────────────── */}
-      <section id="work" className="mx-auto max-w-6xl px-6 py-20 md:py-32 grid gap-24 md:gap-36">
-        <Reveal className="flex items-baseline justify-between">
+      <section id="work" className="py-20 md:py-28">
+        {/* Cabeçalho da seção */}
+        <div className="mx-auto max-w-6xl px-6 mb-10 flex items-baseline justify-between">
           <h2 className="eyebrow">{t.work}</h2>
           <span className="font-mono text-xs text-[color:var(--color-mist)]">
             {String(cases.length).padStart(2, "0")}
           </span>
-        </Reveal>
+        </div>
 
-        {cases.map((c, i) => (
-          <ParallaxCard
-            key={c.id}
-            href={`/${locale}/case/${c.slug}`}
-            title={pick(c, "title", locale)}
-            tagline={pick(c, "tagline", locale)}
-            accent={c.accent}
-            coverUrl={c.cover_url}
-            index={i}
-            portrait={i % 2 !== 0}
-            categoryLabel={categories[c.category]?.[locale as Locale] ?? c.category}
-            year={c.year}
-            viewLabel={t.viewCase}
-          />
-        ))}
+        {/* Grid de cases — padding lateral mínimo para ir quase até a borda */}
+        <div className="px-4">
+          <CasesRow items={caseItems} basePath={`/${locale}`} />
+        </div>
       </section>
 
       {/* ── About strip ──────────────────────────────────────────────────── */}
       <section className="bg-[color:var(--color-coal)] text-white">
         <div className="mx-auto max-w-6xl px-6 py-28 md:py-36 grid md:grid-cols-2 gap-16 items-center">
           <Reveal>
-            <p className="eyebrow !text-white/40 mb-6">{locale === "pt" ? "Sobre" : "About"}</p>
+            <p className="eyebrow !text-white/40 mb-6">
+              {locale === "pt" ? "Sobre" : "About"}
+            </p>
             <p className="font-display font-semibold text-3xl md:text-5xl leading-[1.1]">
               {locale === "pt"
                 ? "Designer focado em produto, pesquisa e identidade visual."
