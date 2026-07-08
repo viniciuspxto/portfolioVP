@@ -259,6 +259,71 @@ export function Preloader() {
   );
 }
 
+// ── CasesGrid (grid 2 colunas inspirado em Raxo) ─────────────────────────────
+function GridCard({
+  item,
+  basePath,
+  priority = false,
+}: {
+  item: CaseItem;
+  basePath: string;
+  priority?: boolean;
+}) {
+  const reduce = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [-40, 40]);
+
+  return (
+    <a href={`${basePath}/case/${item.slug}`} className="group block bg-[color:var(--color-gesso)]">
+      <div ref={ref} className="aspect-[16/10] overflow-hidden relative bg-[color:var(--color-line)]">
+        {item.coverUrl ? (
+          <motion.div style={{ y, position: "absolute", top: -45, bottom: -45, left: 0, right: 0 }}>
+            <Image
+              src={item.coverUrl}
+              alt={item.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+              priority={priority}
+            />
+          </motion.div>
+        ) : (
+          <div
+            className="absolute inset-0 transition-transform duration-700 group-hover:scale-[1.04]"
+            style={{ background: `linear-gradient(135deg, ${item.accent} 0%, #0c0c0e 150%)` }}
+          />
+        )}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500 ease-out" />
+      </div>
+      <div className="pt-4 pb-2">
+        <p className="text-[0.9rem] font-medium leading-snug text-[color:var(--color-ink)]">
+          {item.title}
+        </p>
+        <p className="text-[0.9rem] leading-snug text-[color:var(--color-mist)]">{item.subtitle}</p>
+      </div>
+    </a>
+  );
+}
+
+export function CasesGrid({ items, basePath }: { items: CaseItem[]; basePath: string }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-px" style={{ background: "var(--color-line)" }}>
+      {items.map((item, i) => (
+        <motion.div
+          key={item.id}
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.8, ease, delay: i * 0.1 }}
+        >
+          <GridCard item={item} basePath={basePath} priority={i === 0} />
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
 // ── CasesRow (horizontal grid inspirado em R—K) ──────────────────────────────
 interface CaseItem {
   id: string;
